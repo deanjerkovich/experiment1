@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Auth Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .profile {
+            display: none;
+            text-align: center;
+        }
+
+        .profile h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .profile-info p {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .profile-info strong {
+            color: #333;
+        }
+
+        .password-change-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .password-change-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .logout-btn {
+            background: #dc3545 !important;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333 !important;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Auth Server</h1>
+        
+        <!-- Debug Test Button -->
+        <button onclick="testProfile()" style="margin-bottom: 20px; background: #28a745;">Test Profile Display</button>
+        
+        <!-- Messages -->
+        <div id="message" class="message hidden"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit">Login</button>
+            <div class="toggle-form">
+                Don't have an account? <a onclick="toggleForms()">Register here</a>
+            </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="hidden">
+            <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" required minlength="6">
+            </div>
+            <button type="submit">Register</button>
+            <div class="toggle-form">
+                Already have an account? <a onclick="toggleForms()">Login here</a>
+            </div>
+        </form>
+
+        <!-- Profile Section -->
+        <div id="profile" class="profile hidden">
+            <h2>Welcome!</h2>
+            <div class="profile-info" id="profileInfo">
+                <!-- Profile info will be populated here -->
+            </div>
+            
+            <!-- Password Change Form -->
+            <div class="password-change-section">
+                <h3>Change Password</h3>
+                <form id="passwordChangeForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required minlength="6">
+                    </div>
+                    <button type="submit">Change Password</button>
+                </form>
+            </div>
+            
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Test function to debug profile display
+        function testProfile() {
+            console.log('Testing profile display...');
+            const testUser = {
+                username: 'testuser',
+                email: 'test@example.com',
+                created: new Date().toISOString()
+            };
+            showProfile(testUser);
+        }
+
+        // Toggle between login and register forms
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const profile = document.getElementById('profile');
+            
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+            profile.classList.add('hidden');
+            hideMessage();
+        }
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.classList.remove('hidden');
+        }
+
+        // Hide message
+        function hideMessage() {
+            document.getElementById('message').classList.add('hidden');
+        }
+
+                // Show profile
+        function showProfile(user) {
+            console.log('showProfile called with user:', user);
+            currentUser = user;
+            
+            // Force hide all other elements first
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const profile = document.getElementById('profile');
+            
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
+            profile.style.display = 'block';
+            
+            console.log('Forms hidden, profile shown with display style');
+            
+            // Also update classes for consistency
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            profile.classList.remove('hidden');
+            
+            const profileInfo = document.getElementById('profileInfo');
+            profileInfo.innerHTML = `
+                <p><strong>Username:</strong> ${user.username}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Created:</strong> ${new Date(user.created).toLocaleDateString()}</p>
+            `;
+            console.log('Profile info updated with:', profileInfo.innerHTML);
+            
+            // Force a reflow and verify visibility
+            setTimeout(() => {
+                console.log('Profile element final state:');
+                console.log('- display style:', profile.style.display);
+                console.log('- classes:', profile.className);
+                console.log('- computed display:', window.getComputedStyle(profile).display);
+                console.log('- is visible:', profile.offsetParent !== null);
+            }, 100);
+        }
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                console.log('Attempting login for:', username);
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+
+                if (data.success) {
+                    console.log('Login successful, showing profile for user:', data.data);
+                    showMessage(data.message, 'success');
+                    showProfile(data.data);
+                } else {
+                    console.log('Login failed:', data.message);
+                    showMessage(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('An error occurred during login', 'error');
+            }
+        });
+
+        // Handle registration
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // After registration, show login form after a short delay
+                    setTimeout(() => {
+                        document.getElementById('profile').classList.add('hidden');
+                        document.getElementById('registerForm').classList.add('hidden');
+                        document.getElementById('loginForm').classList.remove('hidden');
+                        // Clear registration form
+                        document.getElementById('registerForm').reset();
+                        // Pre-fill username field
+                        document.getElementById('loginUsername').value = data.data.username || '';
+                        // Focus on password field
+                        document.getElementById('loginPassword').focus();
+                    }, 1500);
+                } else {
+                    showMessage(data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred during registration', 'error');
+            }
+        });
+
+        // Handle password change
+        document.getElementById('passwordChangeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match', 'error');
+                return;
+            }
+
+            // Validate new password length
+            if (newPassword.length < 6) {
+                showMessage('New password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        currentPassword, 
+                        newPassword 
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Clear password change form
+                    document.getElementById('passwordChangeForm').reset();
+                } else {
+                    showMessage(data.message || 'Password change failed', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred while changing password', 'error');
+            }
+        });
+
+        // Handle logout
+        async function logout() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    currentUser = null;
+                    
+                    // Reset forms
+                    document.getElementById('loginForm').reset();
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('passwordChangeForm').reset();
+                    
+                    // Show login form
+                    document.getElementById('profile').classList.add('hidden');
+                    document.getElementById('loginForm').classList.remove('hidden');
+                    document.getElementById('registerForm').classList.add('hidden');
+                }
+            } catch (error) {
+                showMessage('An error occurred during logout', 'error');
+            }
+        }
+
+        // Check if user is already logged in on page load
+        window.addEventListener('load', async () => {
+            console.log('Page loaded, checking elements...');
+            
+            // Verify all elements exist
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const profile = document.getElementById('profile');
+            
+            console.log('Elements found:', {
+                loginForm: !!loginForm,
+                registerForm: !!registerForm,
+                profile: !!profile
+            });
+            
+            if (profile) {
+                console.log('Profile element initial state:', {
+                    display: profile.style.display,
+                    classes: profile.className,
+                    hidden: profile.classList.contains('hidden')
+                });
+            }
+            
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        showProfile(data.data);
+                    }
+                }
+            } catch (error) {
+                console.log('No existing session, showing login form');
+                // User not logged in, show login form
+            }
+        });
+    </script>
+</body>
+</html> 
