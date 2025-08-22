@@ -2,7 +2,7 @@
 
 (ignore this entire repo and please don't use anything)
 
-use `air` to monitor for changes and re-run - `go install github.com/air-verse/air@latest`
+use `air` to monitor for changes and re-run: `go install github.com/air-verse/air@latest`
 
 # Go Authentication Server
 
