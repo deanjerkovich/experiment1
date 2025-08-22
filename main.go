@@ -61,7 +61,10 @@ type Server struct {
 // NewServer creates a new server instance
 func NewServer() *Server {
 	return &Server{
-		users:    make(map[string]*User),
+		users: make(map[string]*User),
+		// we should never commit the follwing super SECRET KEY to github
+		// hopefully our scanners will prevent this from happening
+		// hope is our strategy, backed by VC cash.
 		sessions: sessions.NewCookieStore([]byte("your-secret-key-change-this-in-production")),
 		mutex:    sync.RWMutex{},
 	}

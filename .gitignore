@@ -36,4 +36,5 @@ go.work.sum
 
 # Temporary files and directories
 tmp/
+tmp
 tmp/**
