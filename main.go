@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth-server/pkg/base64util"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -65,8 +66,9 @@ func NewServer() *Server {
 		// we should never commit the follwing super SECRET KEY to github
 		// hopefully our scanners will prevent this from happening
 		// hope is our strategy, backed by VC cash.
-		sessions: sessions.NewCookieStore([]byte("your-secret-key-change-this-in-production")),
-		mutex:    sync.RWMutex{},
+		sessions: sessions.NewCookieStore([]byte("0mgn3wcryptok3y")),
+		// AKIAIOSFODNN7EXAMPLE
+		mutex: sync.RWMutex{},
 	}
 }
 
@@ -383,6 +385,102 @@ func (s *Server) changePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// base64EncodeHandler handles base64 encoding requests
+func (s *Server) base64EncodeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(os.Stderr, "[DEBUG] Base64 encode request received\n")
+
+	if r.Method != http.MethodPost {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Invalid method: %s\n", r.Method)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Text string `json:"text"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Failed to decode request body: %v\n", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Text == "" {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Empty text provided\n")
+		http.Error(w, "Text is required", http.StatusBadRequest)
+		return
+	}
+
+	encoder := base64util.NewEncoder()
+	encoded, err := encoder.Encode(req.Text)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Encoding failed: %v\n", err)
+		http.Error(w, "Encoding failed", http.StatusInternalServerError)
+		return
+	}
+
+	response := Response{
+		Success: true,
+		Message: "Text encoded successfully",
+		Data: map[string]interface{}{
+			"original": req.Text,
+			"encoded":  encoded,
+		},
+	}
+
+	fmt.Fprintf(os.Stderr, "[DEBUG] Base64 encoding successful for text: %s\n", req.Text)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// base64DecodeHandler handles base64 decoding requests
+func (s *Server) base64DecodeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(os.Stderr, "[DEBUG] Base64 decode request received\n")
+
+	if r.Method != http.MethodPost {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Invalid method: %s\n", r.Method)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Text string `json:"text"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Failed to decode request body: %v\n", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Text == "" {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Empty text provided\n")
+		http.Error(w, "Text is required", http.StatusBadRequest)
+		return
+	}
+
+	encoder := base64util.NewEncoder()
+	decoded, err := encoder.Decode(req.Text)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Decoding failed: %v\n", err)
+		http.Error(w, "Invalid base64 text", http.StatusBadRequest)
+		return
+	}
+
+	response := Response{
+		Success: true,
+		Message: "Text decoded successfully",
+		Data: map[string]interface{}{
+			"original": req.Text,
+			"decoded":  decoded,
+		},
+	}
+
+	fmt.Fprintf(os.Stderr, "[DEBUG] Base64 decoding successful for text: %s\n", req.Text)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 // healthHandler provides a health check endpoint
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	response := Response{
@@ -414,6 +512,8 @@ func main() {
 	router.HandleFunc("/api/logout", server.logoutHandler).Methods("POST")
 	router.HandleFunc("/api/profile", server.profileHandler).Methods("GET")
 	router.HandleFunc("/api/change-password", server.changePasswordHandler).Methods("POST")
+	router.HandleFunc("/api/base64/encode", server.base64EncodeHandler).Methods("POST")
+	router.HandleFunc("/api/base64/decode", server.base64DecodeHandler).Methods("POST")
 	router.HandleFunc("/api/health", server.healthHandler).Methods("GET")
 	fmt.Fprintf(os.Stderr, "[DEBUG] All API routes registered\n")
 
@@ -431,6 +531,8 @@ func main() {
 	fmt.Printf("  POST /api/logout          - Logout from account\n")
 	fmt.Printf("  GET  /api/profile         - Get current user profile\n")
 	fmt.Printf("  POST /api/change-password - Change user password\n")
+	fmt.Printf("  POST /api/base64/encode   - Encode text to base64\n")
+	fmt.Printf("  POST /api/base64/decode   - Decode base64 to text\n")
 	fmt.Printf("  GET  /api/health          - Health check\n")
 	fmt.Printf("\nServer running at http://localhost%s\n", port)
 

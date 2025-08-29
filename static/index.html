@@ -150,6 +150,162 @@
             background: #c82333 !important;
         }
 
+        /* Navigation Menu Styles */
+        .top-nav {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-item:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        .nav-content {
+            display: none;
+        }
+
+        .nav-content.active {
+            display: block !important;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Base64 Tool Styles */
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .result {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            margin-top: 10px;
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            display: inline-block;
+            margin: 0 20px;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         .message {
             padding: 12px;
             border-radius: 8px;
@@ -179,8 +335,7 @@
     <div class="container">
         <h1>🔐 Auth Server</h1>
         
-        <!-- Debug Test Button -->
-        <button onclick="testProfile()" style="margin-bottom: 20px; background: #28a745;">Test Profile Display</button>
+
         
         <!-- Messages -->
         <div id="message" class="message hidden"></div>
@@ -223,48 +378,111 @@
 
         <!-- Profile Section -->
         <div id="profile" class="profile hidden">
-            <h2>Welcome!</h2>
-            <div class="profile-info" id="profileInfo">
-                <!-- Profile info will be populated here -->
+            <!-- Navigation Menu -->
+            <nav class="top-nav hidden" id="topNav">
+                <div class="nav-item active" onclick="showProfileContent()">
+                    <span class="nav-icon">👤</span>
+                    Profile
+                </div>
+                <div class="nav-item" onclick="showBase64Content()">
+                    <span class="nav-icon">🔐</span>
+                    Base64 Tools
+                </div>
+                <div class="nav-item" onclick="handleLogoutClick()">
+                    <span class="nav-icon">🚪</span>
+                    Logout
+                </div>
+            </nav>
+
+            <!-- Profile Content -->
+            <div id="profileContent" class="nav-content active">
+                <h2>Welcome!</h2>
+                <div class="profile-info" id="profileInfo">
+                    <!-- Profile info will be populated here -->
+                </div>
+                
+                <!-- Password Change Form -->
+                <div class="password-change-section">
+                    <h3>Change Password</h3>
+                    <form id="passwordChangeForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" required minlength="6">
+                        </div>
+                        <button type="submit">Change Password</button>
+                    </form>
+                </div>
             </div>
-            
-            <!-- Password Change Form -->
-            <div class="password-change-section">
-                <h3>Change Password</h3>
-                <form id="passwordChangeForm">
+
+            <!-- Base64 Content -->
+            <div id="base64Content" class="nav-content">
+                <h2>Base64 Converter</h2>
+                <p class="subtitle">Convert text to and from base64 format</p>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('encode')">Encode to Base64</button>
+                    <button class="tab" onclick="switchTab('decode')">Decode from Base64</button>
+                </div>
+
+                <!-- Encode Tab -->
+                <div id="encode-tab" class="tab-content active">
                     <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input type="password" id="currentPassword" required>
+                        <label for="encodeInput">Enter text to encode:</label>
+                        <textarea id="encodeInput" placeholder="Type or paste your text here..."></textarea>
                     </div>
+                    <button onclick="encodeText()">Encode to Base64</button>
+                    
+                    <div id="encodeResult" class="result hidden">
+                        <h3>Encoded Result:</h3>
+                        <div id="encodedText" class="result-text"></div>
+                        <button class="copy-btn" onclick="copyToClipboard('encodedText')">Copy to Clipboard</button>
+                    </div>
+                </div>
+
+                <!-- Decode Tab -->
+                <div id="decode-tab" class="tab-content">
                     <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" id="newPassword" required minlength="6">
+                        <label for="decodeInput">Enter base64 text to decode:</label>
+                        <textarea id="decodeInput" placeholder="Paste your base64 encoded text here..."></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" id="confirmPassword" required minlength="6">
+                    <button onclick="decodeText()">Decode from Base64</button>
+                    
+                    <div id="decodeResult" class="result hidden">
+                        <h3>Decoded Result:</h3>
+                        <div id="decodedText" class="result-text"></div>
+                        <button class="copy-btn" onclick="copyToClipboard('decodedText')">Copy to Clipboard</button>
                     </div>
-                    <button type="submit">Change Password</button>
-                </form>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <h3>Conversion Statistics</h3>
+                    <div class="stat-item">
+                        <div class="stat-value" id="encodeCount">0</div>
+                        <div>Encodings</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="decodeCount">0</div>
+                        <div>Decodings</div>
+                    </div>
+                </div>
             </div>
-            
-            <button onclick="logout()" class="logout-btn">Logout</button>
         </div>
     </div>
 
     <script>
         let currentUser = null;
 
-        // Test function to debug profile display
-        function testProfile() {
-            console.log('Testing profile display...');
-            const testUser = {
-                username: 'testuser',
-                email: 'test@example.com',
-                created: new Date().toISOString()
-            };
-            showProfile(testUser);
-        }
+
 
         // Toggle between login and register forms
         function toggleForms() {
@@ -272,8 +490,18 @@
             const registerForm = document.getElementById('registerForm');
             const profile = document.getElementById('profile');
             
-            loginForm.classList.toggle('hidden');
-            registerForm.classList.toggle('hidden');
+            // Toggle between forms
+            if (loginForm.classList.contains('hidden')) {
+                // Show login, hide register
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                // Show register, hide login
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            }
+            
+            // Always hide profile when switching forms
             profile.classList.add('hidden');
             hideMessage();
         }
@@ -301,16 +529,35 @@
             const registerForm = document.getElementById('registerForm');
             const profile = document.getElementById('profile');
             
+            // Hide forms
             loginForm.style.display = 'none';
             registerForm.style.display = 'none';
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            
+            // Show profile
             profile.style.display = 'block';
+            profile.classList.remove('hidden');
             
             console.log('Forms hidden, profile shown with display style');
             
-            // Also update classes for consistency
-            loginForm.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            profile.classList.remove('hidden');
+            // Show the navigation menu now that user is authenticated
+            const topNav = document.getElementById('topNav');
+            topNav.classList.remove('hidden');
+            topNav.style.display = 'flex';
+            
+            // Show profile content by default
+            const profileContent = document.getElementById('profileContent');
+            const base64Content = document.getElementById('base64Content');
+            
+            if (profileContent) {
+                profileContent.classList.add('active');
+                profileContent.style.display = 'block';
+            }
+            if (base64Content) {
+                base64Content.classList.remove('active');
+                base64Content.style.display = 'none';
+            }
             
             const profileInfo = document.getElementById('profileInfo');
             profileInfo.innerHTML = `
@@ -329,6 +576,177 @@
                 console.log('- is visible:', profile.offsetParent !== null);
             }, 100);
         }
+
+        // Navigation functions
+        function showProfileContent() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector('.nav-item:first-child').classList.add('active');
+            
+            document.querySelectorAll('.nav-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            const profileContent = document.getElementById('profileContent');
+            if (profileContent) {
+                profileContent.classList.add('active');
+                profileContent.style.display = 'block';
+            }
+        }
+
+        function showBase64Content() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+            
+            document.querySelectorAll('.nav-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            const base64Content = document.getElementById('base64Content');
+            if (base64Content) {
+                base64Content.classList.add('active');
+                base64Content.style.display = 'block';
+            }
+        }
+
+        // Base64 tab functions
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            
+            // Hide any existing results
+            hideResults();
+            hideMessage();
+        }
+
+        // Hide results
+        function hideResults() {
+            document.getElementById('encodeResult').classList.add('hidden');
+            document.getElementById('decodeResult').classList.add('hidden');
+        }
+
+        // Base64 encoding function
+        async function encodeText() {
+            const input = document.getElementById('encodeInput').value.trim();
+            
+            if (!input) {
+                showMessage('Please enter some text to encode', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/base64/encode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: input }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('encodedText').textContent = data.data.encoded;
+                    document.getElementById('encodeResult').classList.remove('hidden');
+                    encodeCount++;
+                    updateStats();
+                    showMessage(data.message, 'success');
+                } else {
+                    if (response.status === 401) {
+                        // Unauthorized, redirect to login
+                        showMessage('Authentication required. Please login again.', 'error');
+                        forceShowLogin();
+                    } else {
+                        showMessage(data.message || 'Encoding failed', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('An error occurred during encoding', 'error');
+            }
+        }
+
+        // Base64 decoding function
+        async function decodeText() {
+            const input = document.getElementById('decodeInput').value.trim();
+            
+            if (!input) {
+                showMessage('Please enter some base64 text to decode', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/base64/decode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: input }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('decodedText').textContent = data.data.decoded;
+                    document.getElementById('decodeResult').classList.remove('hidden');
+                    decodeCount++;
+                    updateStats();
+                    showMessage(data.message, 'success');
+                } else {
+                    if (response.status === 401) {
+                        // Unauthorized, redirect to login
+                        showMessage('Authentication required. Please login again.', 'error');
+                        forceShowLogin();
+                    } else {
+                        showMessage(data.message || 'Decoding failed', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('An error occurred during decoding', 'error');
+            }
+        }
+
+        // Copy to clipboard function
+        async function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                showMessage('Copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage('Copied to clipboard!', 'success');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('encodeCount').textContent = encodeCount;
+            document.getElementById('decodeCount').textContent = decodeCount;
+        }
+
+        // Initialize base64 counters
+        let encodeCount = 0;
+        let decodeCount = 0;
 
         // Handle login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -444,21 +862,46 @@
                     // Clear password change form
                     document.getElementById('passwordChangeForm').reset();
                 } else {
-                    showMessage(data.message || 'Password change failed', 'error');
+                    if (response.status === 401) {
+                        // Unauthorized, redirect to login
+                        showMessage('Authentication required. Please login again.', 'error');
+                        forceShowLogin();
+                    } else {
+                        showMessage(data.message || 'Password change failed', 'error');
+                    }
                 }
             } catch (error) {
                 showMessage('An error occurred while changing password', 'error');
             }
         });
 
+        // Handle logout click - immediate UI change
+        function handleLogoutClick() {
+            console.log('Logout button clicked');
+            
+            // Immediately hide all authenticated content
+            const profile = document.getElementById('profile');
+            const topNav = document.getElementById('topNav');
+            const loginForm = document.getElementById('loginForm');
+            
+            if (profile) profile.style.display = 'none';
+            if (topNav) topNav.style.display = 'none';
+            if (loginForm) loginForm.style.display = 'block';
+            
+            // Then call the async logout function
+            logout();
+        }
+
         // Handle logout
         async function logout() {
+            console.log('Logout function called');
             try {
                 const response = await fetch('/api/logout', {
                     method: 'POST',
                 });
 
                 const data = await response.json();
+                console.log('Logout response:', data);
 
                 if (data.success) {
                     showMessage(data.message, 'success');
@@ -469,13 +912,66 @@
                     document.getElementById('registerForm').reset();
                     document.getElementById('passwordChangeForm').reset();
                     
-                    // Show login form
-                    document.getElementById('profile').classList.add('hidden');
-                    document.getElementById('loginForm').classList.remove('hidden');
-                    document.getElementById('registerForm').classList.add('hidden');
+                    console.log('Forms reset, calling forceShowLogin...');
+                    // Force redirect to login screen
+                    forceShowLogin();
+                } else {
+                    console.log('Logout failed, forcing login anyway');
+                    forceShowLogin();
                 }
             } catch (error) {
+                console.log('Logout error:', error);
                 showMessage('An error occurred during logout', 'error');
+                // Even if logout fails, force login screen
+                forceShowLogin();
+            }
+        }
+
+        // Force show login screen and hide everything else
+        function forceShowLogin() {
+            console.log('forceShowLogin called');
+            
+            try {
+                // Hide all authenticated content
+                const profile = document.getElementById('profile');
+                const topNav = document.getElementById('topNav');
+                const loginForm = document.getElementById('loginForm');
+                
+                console.log('Elements found:', {
+                    profile: !!profile,
+                    topNav: !!topNav,
+                    loginForm: !!loginForm
+                });
+                
+                if (profile) {
+                    profile.classList.add('hidden');
+                    profile.style.display = 'none';
+                    console.log('Profile hidden');
+                }
+                
+                if (topNav) {
+                    topNav.classList.add('hidden');
+                    topNav.style.display = 'none';
+                    console.log('Top nav hidden');
+                }
+                
+                // Show only login form, but don't hide register form
+                // (let toggleForms handle that)
+                if (loginForm) {
+                    loginForm.classList.remove('hidden');
+                    loginForm.style.display = 'block';
+                    console.log('Login form shown');
+                }
+                
+                // Clear any existing messages
+                hideMessage();
+                
+                // Reset current user
+                currentUser = null;
+                
+                console.log('forceShowLogin completed successfully');
+            } catch (error) {
+                console.error('Error in forceShowLogin:', error);
             }
         }
 
@@ -490,7 +986,7 @@
             
             console.log('Elements found:', {
                 loginForm: !!loginForm,
-                registerForm: !!registerForm,
+                registerForm: !!loginForm,
                 profile: !!profile
             });
             
@@ -508,11 +1004,63 @@
                     const data = await response.json();
                     if (data.success) {
                         showProfile(data.data);
+                    } else {
+                        // Session invalid, force login
+                        forceShowLogin();
                     }
+                } else {
+                    // No valid session, force login
+                    forceShowLogin();
                 }
             } catch (error) {
                 console.log('No existing session, showing login form');
-                // User not logged in, show login form
+                // User not logged in, force login form
+                forceShowLogin();
+            }
+        });
+
+        // Add event listeners for base64 textareas when they become available
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle Enter key in textareas (when they exist)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    if (e.target.id === 'encodeInput') {
+                        encodeText();
+                    } else if (e.target.id === 'decodeInput') {
+                        decodeText();
+                    }
+                }
+            });
+        });
+
+        // Periodic authentication check to catch expired sessions
+        setInterval(async () => {
+            if (currentUser) {
+                try {
+                    const response = await fetch('/api/profile');
+                    if (!response.ok || !(await response.json()).success) {
+                        // Session expired, force logout
+                        console.log('Session expired, redirecting to login');
+                        forceShowLogin();
+                        showMessage('Your session has expired. Please login again.', 'error');
+                    }
+                } catch (error) {
+                    // Network error or session invalid, force logout
+                    console.log('Authentication check failed, redirecting to login');
+                    forceShowLogin();
+                    showMessage('Authentication failed. Please login again.', 'error');
+                }
+            }
+        }, 60000); // Check every minute
+
+        // Emergency fallback: ensure login form is always accessible
+        // This prevents users from getting stuck on authenticated pages
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Shift+L emergency logout
+            if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                console.log('Emergency logout triggered');
+                forceShowLogin();
+                showMessage('Emergency logout activated', 'info');
             }
         });
     </script>
