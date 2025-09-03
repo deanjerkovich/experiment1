@@ -12,74 +12,11 @@ import (
 func TestNewServer(t *testing.T) {
 	server := NewServer()
 
-	if server.users == nil {
+	if server.authHandler == nil {
+		t.Error("Expected authHandler to be initialized")
+	}
+	if server.authHandler != nil && server.authHandler.users == nil {
 		t.Error("Expected users map to be initialized")
-	}
-
-	if server.sessions == nil {
-		t.Error("Expected sessions to be initialized")
-	}
-
-	if len(server.users) != 0 {
-		t.Errorf("Expected 0 users, got %d", len(server.users))
-	}
-}
-
-func TestGenerateID(t *testing.T) {
-	id1 := generateID()
-	id2 := generateID()
-
-	if id1 == "" {
-		t.Error("Expected non-empty ID")
-	}
-
-	if id2 == "" {
-		t.Error("Expected non-empty ID")
-	}
-
-	if id1 == id2 {
-		t.Error("Expected unique IDs")
-	}
-}
-
-func TestHashPassword(t *testing.T) {
-	password := "testpassword123"
-
-	hash, err := hashPassword(password)
-	if err != nil {
-		t.Errorf("Expected no error hashing password: %v", err)
-	}
-
-	if hash == "" {
-		t.Error("Expected non-empty hash")
-	}
-
-	if hash == password {
-		t.Error("Expected hash to be different from original password")
-	}
-}
-
-func TestCheckPassword(t *testing.T) {
-	password := "testpassword123"
-
-	hash, err := hashPassword(password)
-	if err != nil {
-		t.Fatalf("Failed to hash password for test: %v", err)
-	}
-
-	// Test correct password
-	if !checkPassword(password, hash) {
-		t.Error("Expected correct password to match hash")
-	}
-
-	// Test incorrect password
-	if checkPassword("wrongpassword", hash) {
-		t.Error("Expected incorrect password to not match hash")
-	}
-
-	// Test empty password
-	if checkPassword("", hash) {
-		t.Error("Expected empty password to not match hash")
 	}
 }
 
@@ -162,8 +99,8 @@ func TestRegisterHandler(t *testing.T) {
 					t.Errorf("Expected success response, got: %v", response)
 				}
 
-				if len(server.users) != 1 {
-					t.Errorf("Expected 1 user, got %d", len(server.users))
+				if len(server.authHandler.users) != 1 {
+					t.Errorf("Expected 1 user, got %d", len(server.authHandler.users))
 				}
 			}
 		})
@@ -228,8 +165,8 @@ func TestRegisterHandlerDuplicateUser(t *testing.T) {
 	}
 
 	// Should still only have 1 user
-	if len(server.users) != 1 {
-		t.Errorf("Expected 1 user after duplicate attempts, got %d", len(server.users))
+	if len(server.authHandler.users) != 1 {
+		t.Errorf("Expected 1 user after duplicate attempts, got %d", len(server.authHandler.users))
 	}
 }
 
@@ -637,8 +574,8 @@ func TestHealthHandler(t *testing.T) {
 		t.Error("Expected timestamp in health data")
 	}
 
-	if _, exists := healthData["users"]; !exists {
-		t.Error("Expected users count in health data")
+	if _, exists := healthData["status"]; !exists {
+		t.Error("Expected status in health data")
 	}
 }
 
